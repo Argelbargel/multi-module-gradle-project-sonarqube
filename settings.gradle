@@ -1,0 +1,10 @@
+gradle.allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+
+include 'common-module'
+include 'extension-module'
+
+

@@ -1,0 +1,8 @@
+apply from: 'gradle/java.gradle'
+apply from: 'gradle/sonarqube.gradle'
+
+evaluationDependsOn('common-module')
+
+dependencies {
+    compile project('common-module')
+}
