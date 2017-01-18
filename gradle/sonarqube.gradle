@@ -15,7 +15,6 @@ sonarqube {
     properties {
         property 'sonar.java.source', sourceCompatibility
         property 'sonar.cpd.cross_project', true
-        property 'sonar.rootModuleName', 'main'
     }
 }
 
@@ -28,20 +27,20 @@ class SonarqubeMultiProjectAdapterPlugin implements Plugin<Project> {
     private static final Field TASK_PROPERTIES_FIELD = Class.forName(TASK_CLASSNAME).getDeclaredField('sonarProperties')
     private static final String PROPERTY_PREFIX = 'sonar.'
     private static final String PROPERTY_MODULES = PROPERTY_PREFIX + 'modules'
-    private static final String PROPERTY_PROJECT_NAME = PROPERTY_PREFIX + "projectName"
-    private static final String PROPERTY_PROJECT_KEY = PROPERTY_PREFIX + "projectKey"
-    private static final String PROPERTY_MODULE_KEY = PROPERTY_PREFIX + "moduleKey"
-    private static final String PROPERTY_ROOTMODULE_NAME = PROPERTY_PREFIX + "rootModuleName"
+    private static final String PROPERTY_PROJECT_NAME = PROPERTY_PREFIX + 'projectName'
+    private static final String PROPERTY_PROJECT_KEY = PROPERTY_PREFIX + 'projectKey'
+    private static final String PROPERTY_MODULE_KEY = PROPERTY_PREFIX + 'moduleKey'
+    private static final String PROPERTY_BASE_DIR = PROPERTY_PREFIX + 'projectBaseDir'
+    private static final String PROPERTY_ROOTMODULE_NAME = PROPERTY_PREFIX + 'rootModuleName'
     private static final List<String> PROPERTIES_SOURCES = ['sources', 'tests']
     private static final List<String> PROPERTIES_TO_MOVE = PROPERTIES_SOURCES + [
-            "sourceEncoding",
+            'sourceEncoding',
             'libraries', 'java.libraries', 'java.test.libraries',
-            "binaries", "java.binaries", "java.test.binaries",
-            "java.source", "java.target",
-            "junit.reportsPath", "surefire.reportsPath", "jacoco.reportPath",
-            "test.exclusions",
+            'binaries', 'java.binaries', 'java.test.binaries',
+            'java.source', 'java.target',
+            'junit.reportsPath', 'surefire.reportsPath', 'jacoco.reportPath',
+            'test.exclusions'
     ]
-    private static final List<String> PROPERTIES_TO_COPY = [ "projectBaseDir", "projectName" ]
 
     @Override
     void apply(Project project) {
@@ -59,7 +58,6 @@ class SonarqubeMultiProjectAdapterPlugin implements Plugin<Project> {
         if (hasModules(properties) && hasProjectSources(properties)) {
             String rootModule = addRootModule(properties)
             PROPERTIES_TO_MOVE.each { movePropertyToModule(properties, prefixedProperty(it), rootModule) }
-            PROPERTIES_TO_COPY.each { copyPropertyToModule(properties, prefixedProperty(it), rootModule) }
         }
         return properties
     }
@@ -75,9 +73,10 @@ class SonarqubeMultiProjectAdapterPlugin implements Plugin<Project> {
     private static String addRootModule(Map<String, Object> properties) {
         String rootModuleName = properties.containsKey(PROPERTY_ROOTMODULE_NAME) ? properties.remove(PROPERTY_ROOTMODULE_NAME) : properties.get(PROPERTY_PROJECT_NAME)
         String rootModuleKey = rootModuleName.startsWith(":") ? rootModuleName : ":" + rootModuleName
-        properties.put(PROPERTY_MODULES, rootModuleName + "," + properties.get(PROPERTY_MODULES))
+        properties.put(PROPERTY_MODULES, rootModuleKey + "," + properties.get(PROPERTY_MODULES))
         properties.put(rootModuleKey + "." + PROPERTY_PROJECT_NAME, rootModuleName)
         properties.put(rootModuleKey + "." + PROPERTY_MODULE_KEY, properties.get(PROPERTY_PROJECT_KEY) + rootModuleKey)
+        properties.put(rootModuleKey + "." + PROPERTY_BASE_DIR, properties.get(PROPERTY_BASE_DIR))
         return rootModuleKey
     }
 
@@ -93,12 +92,6 @@ class SonarqubeMultiProjectAdapterPlugin implements Plugin<Project> {
     private static movePropertyToModule(Map<String, Object> properties, String property, String module) {
         if (properties.containsKey(property)) {
             properties.put(prefixedProperty(property, module), properties.remove(property))
-        }
-    }
-
-    private static copyPropertyToModule(Map properties, String property, String module) {
-        if (properties.containsKey(property)) {
-            properties.put(prefixedProperty(property, module), properties.get(property))
         }
     }
 }
