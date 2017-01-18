@@ -15,6 +15,7 @@ sonarqube {
     properties {
         property 'sonar.java.source', sourceCompatibility
         property 'sonar.cpd.cross_project', true
+        property 'sonar.rootModuleName', 'main'
     }
 }
 
@@ -30,6 +31,7 @@ class SonarqubeMultiProjectAdapterPlugin implements Plugin<Project> {
     private static final String PROPERTY_PROJECT_NAME = PROPERTY_PREFIX + "projectName"
     private static final String PROPERTY_PROJECT_KEY = PROPERTY_PREFIX + "projectKey"
     private static final String PROPERTY_MODULE_KEY = PROPERTY_PREFIX + "moduleKey"
+    private static final String PROPERTY_ROOTMODULE_NAME = PROPERTY_PREFIX + "rootModuleName"
     private static final List<String> PROPERTIES_SOURCES = ['sources', 'tests']
     private static final List<String> PROPERTIES_TO_MOVE = PROPERTIES_SOURCES + [
             "sourceEncoding",
@@ -71,10 +73,12 @@ class SonarqubeMultiProjectAdapterPlugin implements Plugin<Project> {
     }
 
     private static String addRootModule(Map<String, Object> properties) {
-        String rootModuleName = ":" + properties.get(PROPERTY_PROJECT_NAME)
+        String rootModuleName = properties.containsKey(PROPERTY_ROOTMODULE_NAME) ? properties.remove(PROPERTY_ROOTMODULE_NAME) : properties.get(PROPERTY_PROJECT_NAME)
+        String rootModuleKey = rootModuleName.startsWith(":") ? rootModuleName : ":" + rootModuleName
         properties.put(PROPERTY_MODULES, rootModuleName + "," + properties.get(PROPERTY_MODULES))
-        properties.put(rootModuleName + "." + PROPERTY_MODULE_KEY, properties.get(PROPERTY_PROJECT_KEY) + ":" + rootModuleName)
-        return rootModuleName
+        properties.put(rootModuleKey + "." + PROPERTY_PROJECT_NAME, rootModuleName)
+        properties.put(rootModuleKey + "." + PROPERTY_MODULE_KEY, properties.get(PROPERTY_PROJECT_KEY) + rootModuleKey)
+        return rootModuleKey
     }
 
     private static boolean hasProperty(Map<String, Object> properties, String name) {
