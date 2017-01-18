@@ -15,6 +15,7 @@ sonarqube {
     properties {
         property 'sonar.java.source', sourceCompatibility
         property 'sonar.cpd.cross_project', true
+        property 'sonar.rootModuleName', 'main'
     }
 }
 
