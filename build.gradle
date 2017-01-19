@@ -1,5 +1,5 @@
 apply from: 'gradle/java.gradle'
-apply from: 'gradle/sonarqube.gradle'
+apply from: 'gradle/sonarqube-multiproject.gradle'
 
 evaluationDependsOn('common-module')
 
