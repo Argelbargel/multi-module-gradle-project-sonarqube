@@ -5,7 +5,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'gradle.plugin.argelbargel.gradle.plugins:sonarqube-multiproject-plugin:1.0'
+        classpath 'gradle.plugin.argelbargel.gradle.plugins:sonarqube-multiproject-plugin:1.1'
     }
 }
 
