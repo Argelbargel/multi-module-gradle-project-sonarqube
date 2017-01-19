@@ -6,3 +6,5 @@ evaluationDependsOn('common-module')
 dependencies {
     compile project('common-module')
 }
+
+defaultTasks 'clean', 'sonarqube'
